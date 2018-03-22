@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
   int i=0;
   int j=0;
   int intMax=0;
+  int intCount[16];
   char cmd[BUFSIZE];
   char strTemp[BUFSIZE];
   char strResult[BUFSIZE];
@@ -26,8 +27,9 @@ int main(int argc, char *argv[])
   }
 
   intMax = argc - 1;
+  for(i=0; i<16; i++) intCount[i] = 0;
   printf("-----------------------------------------------\n");
-  printf("A mping targets %d IP address: [msec]\n", intMax);
+  printf("A mping targets %d IP address:\n", intMax);
   printf("-----------------------------------------------\n");
 
 
@@ -38,24 +40,28 @@ int main(int argc, char *argv[])
       for( i = 0; i < intMax; i++ ) {
         printf( "%16s", argv[i+1] );
       }
-      printf("\n");
+      printf( "\n" );
+      for( i = 0; i < intMax; i++ ) {
+        printf( "%16d", intCount[i+1] );
+      }
+      printf(" <- NG out of %d\n", intCount[0] );
     }
     if( j++ == 9 ) j = 0;
 
-    strcpy( strResult, "" );
+    intCount[0]++;
     for ( i = 0; i < intMax; i++ ) {
       snprintf(cmd, BUFSIZE, "ping -c 1 %s", argv[i+1]);
       strReturn = throwPing( cmd );
       if( strReturn != "NULL" ){
-        snprintf(strTemp, BUFSIZE, "%16s", strReturn);
-        strcat( strResult, strTemp );
+        printf( "%16s", strReturn );
       } else {
-        strcat( strResult, "      *** NG ***" );
+        printf( "      *** NG ***" );
+        intCount[i+1]++;
       }
     }
-    printf("%s\n", strResult);
+    printf("\n");
     sleep(1);
-  } while( 1 );
+  } while(1);
 
   return 0;
 }
@@ -67,22 +73,17 @@ char *throwPing( char *strCmd )
   char *token;
 
     if((fp = popen(strCmd, "r")) == NULL) {
-      printf("Can not exec. ");
+      printf("Can not exec ping. ");
       return "NULL";
     }
-
     fgets(buf, BUFSIZE, fp);
     fgets(buf, BUFSIZE, fp);
-
     pclose(fp);
 
     if( strstr(buf, "ttl=") != NULL) {
-      /*token = strtok(buf, "ttl=");*/
       token = getTime( buf, "=" );
       return token;
-      /*printf("%s\n", token);*/
     } else {
-      printf("Time out\n");
       return "NULL";
     }
 
@@ -99,7 +100,7 @@ char *getTime( char strTest[BUFSIZE], char strTrim[BUFSIZE] )
   while( token != NULL ) {
     if(strstr(token,"ms")){
         len = strlen( token );
-        token[len-3] = '\0';
+        token[len-1] = '\0';
         return token;
     }
     token = strtok( NULL, strTrim );
