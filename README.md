@@ -3,7 +3,9 @@ A mping targets multiple IP addresses
 
 
 #1. wget https://github.com/IchiroKano/mping/releases/download/v1.1/mping.zip
+
 #2. unzip mping.zip
+
 #3. ./mping \<IP address1\> \<IP address2\> ...
 
 Example -------------------------------------------------
